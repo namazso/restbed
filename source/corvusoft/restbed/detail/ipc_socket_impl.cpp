@@ -13,10 +13,10 @@
 #include "corvusoft/restbed/detail/ipc_socket_impl.hpp"
 
 //External Includes
-#include <asio/read.hpp>
-#include <asio/write.hpp>
-#include <asio/connect.hpp>
-#include <asio/read_until.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/read_until.hpp>
 
 //System Namespaces
 using std::get;
@@ -26,7 +26,7 @@ using std::string;
 using std::promise;
 using std::function;
 using std::to_string;
-using std::error_code;
+using boost::system::error_code;
 using std::shared_ptr;
 using std::make_shared;
 using std::runtime_error;
@@ -38,15 +38,15 @@ using std::chrono::steady_clock;
 using restbed::detail::IPCSocketImpl;
 
 //External Namespaces
-using asio::io_service;
-using asio::steady_timer;
-using asio::local::stream_protocol;
+using boost::asio::io_service;
+using boost::asio::steady_timer;
+using boost::asio::local::stream_protocol;
 
 namespace restbed
 {
     namespace detail
     {
-        IPCSocketImpl::IPCSocketImpl( asio::io_context& context, const shared_ptr< stream_protocol::socket >& socket, const std::string& path, const shared_ptr< Logger >& logger ) : SocketImpl( context ),
+        IPCSocketImpl::IPCSocketImpl( boost::asio::io_context& context, const shared_ptr< stream_protocol::socket >& socket, const std::string& path, const shared_ptr< Logger >& logger ) : SocketImpl( context ),
             m_error_handler( nullptr ),
             m_is_open( socket->is_open( ) ),
             m_path( path ),
@@ -54,7 +54,7 @@ namespace restbed
             m_logger( logger ),
             m_timeout( 0 ),
             m_io_service( context ),
-            m_timer( make_shared< asio::steady_timer >( m_io_service ) ),
+            m_timer( make_shared< boost::asio::steady_timer >( m_io_service ) ),
             m_strand( make_shared< io_service::strand > ( m_io_service ) ),
             m_socket( socket )
         {
@@ -86,45 +86,45 @@ namespace restbed
             return not m_is_open;
         }
         
-        void IPCSocketImpl::connect( const string&, const uint16_t, const function< void ( const error_code& ) >& callback )
+        void IPCSocketImpl::connect( const string&, const uint16_t, const function< void ( const boost::system::error_code& ) >& callback )
         {          
-            m_socket->async_connect( stream_protocol::endpoint(m_path), [ this, callback ]( const error_code & error )
+            m_socket->async_connect( stream_protocol::endpoint(m_path), [ this, callback ]( const boost::system::error_code & error )
             {
                 m_is_open = true;
                 callback( error );
             } );
         }
         
-        void IPCSocketImpl::sleep_for( const milliseconds& delay, const function< void ( const error_code& ) >& callback )
+        void IPCSocketImpl::sleep_for( const milliseconds& delay, const function< void ( const boost::system::error_code& ) >& callback )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( delay );
             m_timer->async_wait( callback );
         }
 
-        void IPCSocketImpl::start_write(const Bytes& data, const std::function< void ( const std::error_code&, std::size_t ) >& callback)
+        void IPCSocketImpl::start_write(const Bytes& data, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback)
         {
             m_strand->post([this, data, callback] { write_helper(data, callback); });
         }
 
-        size_t IPCSocketImpl::start_read(const shared_ptr< asio::streambuf >& data, const string& delimiter, error_code& error)
+        size_t IPCSocketImpl::start_read(const shared_ptr< boost::asio::streambuf >& data, const string& delimiter, boost::system::error_code& error)
         {
             return read( data, delimiter,error );
         }
         
-        size_t IPCSocketImpl::start_read(const shared_ptr< asio::streambuf >& data, const size_t length, error_code& error)
+        size_t IPCSocketImpl::start_read(const shared_ptr< boost::asio::streambuf >& data, const size_t length, boost::system::error_code& error)
         {
             return read( data, length, error );
         }
 
-        void IPCSocketImpl::start_read( const std::size_t length, const function< void ( const Bytes ) > success, const function< void ( const error_code ) > failure )
+        void IPCSocketImpl::start_read( const std::size_t length, const function< void ( const Bytes ) > success, const function< void ( const boost::system::error_code ) > failure )
         {
             m_strand->post([this, length, success, failure] {
                 read(length, success, failure);
             });
         }
         
-        void IPCSocketImpl::start_read(const shared_ptr< asio::streambuf >& data, const size_t length, const function< void ( const error_code&, size_t ) >& callback)
+        void IPCSocketImpl::start_read(const shared_ptr< boost::asio::streambuf >& data, const size_t length, const function< void ( const boost::system::error_code&, size_t ) >& callback)
         {
             m_strand->post([this, data, length, callback] 
             {
@@ -132,7 +132,7 @@ namespace restbed
             });
         }
 
-        void IPCSocketImpl::start_read(const shared_ptr< asio::streambuf >& data, const string& delimiter, const function< void ( const error_code&, size_t ) >& callback)
+        void IPCSocketImpl::start_read(const shared_ptr< boost::asio::streambuf >& data, const string& delimiter, const function< void ( const boost::system::error_code&, size_t ) >& callback)
         {
             m_strand->post([this, data, delimiter, callback] 
             {
@@ -166,7 +166,7 @@ namespace restbed
             //return shared_ptr< IPCSocketImpl >( this ); //test for circular reference and memory leak.            
         }
         
-        void IPCSocketImpl::connection_timeout_handler( const shared_ptr< IPCSocketImpl > socket, const error_code& error )
+        void IPCSocketImpl::connection_timeout_handler( const shared_ptr< IPCSocketImpl > socket, const boost::system::error_code& error )
         {
             if ( error or socket == nullptr or socket->m_timer->expires_at( ) > steady_clock::now( ) )
             {
@@ -189,13 +189,13 @@ namespace restbed
                 m_timer->expires_from_now( m_timeout );
                 m_timer->async_wait( m_strand->wrap( bind( &IPCSocketImpl::connection_timeout_handler, this, shared_from_this( ), _1 ) ) );
 
-                    asio::async_write( *m_socket, asio::buffer( get<0>(m_pending_writes.front()).data( ), get<0>(m_pending_writes.front()).size( ) ), m_strand->wrap( [ this ]( const error_code & error, size_t length )
+                    boost::asio::async_write( *m_socket, boost::asio::buffer( get<0>(m_pending_writes.front()).data( ), get<0>(m_pending_writes.front()).size( ) ), m_strand->wrap( [ this ]( const boost::system::error_code & error, size_t length )
                     {
                         m_timer->cancel( );
                         auto callback = get<2>(m_pending_writes.front());
                         auto & retries = get<1>(m_pending_writes.front());
                         auto & buffer = get<0>(m_pending_writes.front());
-                        if(length < buffer.size() &&  retries < MAX_WRITE_RETRIES &&  error not_eq asio::error::operation_aborted)
+                        if(length < buffer.size() &&  retries < MAX_WRITE_RETRIES &&  error not_eq boost::asio::error::operation_aborted)
                         {
                             ++retries;
                             buffer.erase(buffer.begin(),buffer.begin() + length);
@@ -204,7 +204,7 @@ namespace restbed
                         {
                             m_pending_writes.pop();
                         }
-                        if ( error not_eq asio::error::operation_aborted )
+                        if ( error not_eq boost::asio::error::operation_aborted )
                         {
                             callback( error, length );
                         }
@@ -223,7 +223,7 @@ namespace restbed
             }
         }
 
-        void IPCSocketImpl::write( const Bytes& data, const function< void ( const error_code&, size_t ) >& callback )
+        void IPCSocketImpl::write( const Bytes& data, const function< void ( const boost::system::error_code&, size_t ) >& callback )
         {
             const auto buffer = make_shared< Bytes >( data );
             
@@ -231,7 +231,7 @@ namespace restbed
             m_timer->expires_from_now( m_timeout );
             m_timer->async_wait( m_strand->wrap( bind( &IPCSocketImpl::connection_timeout_handler, this, shared_from_this( ), _1 ) ) );
 
-            asio::async_write( *m_socket, asio::buffer( buffer->data( ), buffer->size( ) ), m_strand->wrap( [ this, callback, buffer ]( const error_code & error, size_t length )
+            boost::asio::async_write( *m_socket, boost::asio::buffer( buffer->data( ), buffer->size( ) ), m_strand->wrap( [ this, callback, buffer ]( const boost::system::error_code & error, size_t length )
             {
                 m_timer->cancel( );
                 
@@ -240,14 +240,14 @@ namespace restbed
                     m_is_open = false;
                 }
                 
-                if ( error not_eq asio::error::operation_aborted )
+                if ( error not_eq boost::asio::error::operation_aborted )
                 {
                     callback( error, length );
                 }
             } ) );
         }
 
-        void IPCSocketImpl::write_helper(const Bytes& data, const function< void ( const error_code&, size_t ) >& callback)
+        void IPCSocketImpl::write_helper(const Bytes& data, const function< void ( const boost::system::error_code&, size_t ) >& callback)
         {
             const uint8_t retries = 0;
             m_pending_writes.push(make_tuple(data, retries, callback));
@@ -257,7 +257,7 @@ namespace restbed
             }
         }
         
-        size_t IPCSocketImpl::read( const shared_ptr< asio::streambuf >& data, const size_t length, error_code& error )
+        size_t IPCSocketImpl::read( const shared_ptr< boost::asio::streambuf >& data, const size_t length, boost::system::error_code& error )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( m_timeout );
@@ -265,11 +265,11 @@ namespace restbed
 
             size_t size = 0;
             auto finished = std::make_shared<bool>(false);
-            auto sharedError = std::make_shared<error_code>();
+            auto sharedError = std::make_shared<boost::system::error_code>();
             auto sharedSize = std::make_shared<size_t>(0);
 
-            asio::async_read( *m_socket, *data, asio::transfer_at_least( length ),
-                [ finished, sharedSize, sharedError ]( const error_code & error, size_t size ) {
+            boost::asio::async_read( *m_socket, *data, boost::asio::transfer_at_least( length ),
+                [ finished, sharedSize, sharedError ]( const boost::system::error_code & error, size_t size ) {
                     *sharedError = error;
                     *sharedSize = size;
                     *finished = true;
@@ -289,14 +289,14 @@ namespace restbed
             return size;
         }
         
-        void IPCSocketImpl::read( const std::size_t length, const function< void ( const Bytes ) > success, const function< void ( const error_code ) > failure )
+        void IPCSocketImpl::read( const std::size_t length, const function< void ( const Bytes ) > success, const function< void ( const boost::system::error_code ) > failure )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( m_timeout );
             m_timer->async_wait( m_strand->wrap( bind( &IPCSocketImpl::connection_timeout_handler, this, shared_from_this( ), _1 ) ) );
             
-            auto data = make_shared< asio::streambuf >( );
-            asio::async_read( *m_socket, *data, asio::transfer_exactly( length ), [ this, data, success, failure ]( const error_code code, const size_t length )
+            auto data = make_shared< boost::asio::streambuf >( );
+            boost::asio::async_read( *m_socket, *data, boost::asio::transfer_exactly( length ), [ this, data, success, failure ]( const boost::system::error_code code, const size_t length )
             {
                 m_timer->cancel( );
                 
@@ -307,19 +307,19 @@ namespace restbed
                 }
                 else
                 {
-                    const auto data_ptr = asio::buffer_cast< const Byte* >( data->data( ) );
+                    const auto data_ptr = boost::asio::buffer_cast< const Byte* >( data->data( ) );
                     success( Bytes( data_ptr, data_ptr + length ) );
                 }
             } );
         }
         
-        void IPCSocketImpl::read( const shared_ptr< asio::streambuf >& data, const size_t length, const function< void ( const error_code&, size_t ) >& callback )
+        void IPCSocketImpl::read( const shared_ptr< boost::asio::streambuf >& data, const size_t length, const function< void ( const boost::system::error_code&, size_t ) >& callback )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( m_timeout );
             m_timer->async_wait( m_strand->wrap( bind( &IPCSocketImpl::connection_timeout_handler, this, shared_from_this( ), _1 ) ) );
             
-            asio::async_read( *m_socket, *data, asio::transfer_at_least( length ), m_strand->wrap( [ this, callback ]( const error_code & error, size_t length )
+            boost::asio::async_read( *m_socket, *data, boost::asio::transfer_at_least( length ), m_strand->wrap( [ this, callback ]( const boost::system::error_code & error, size_t length )
             {
                 m_timer->cancel( );
                 
@@ -328,14 +328,14 @@ namespace restbed
                     m_is_open = false;
                 }
                 
-                if ( error not_eq asio::error::operation_aborted )
+                if ( error not_eq boost::asio::error::operation_aborted )
                 {
                     callback( error, length );
                 }
             } ) );
         }
         
-        size_t IPCSocketImpl::read( const shared_ptr< asio::streambuf >& data, const string& delimiter, error_code& error )
+        size_t IPCSocketImpl::read( const shared_ptr< boost::asio::streambuf >& data, const string& delimiter, boost::system::error_code& error )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( m_timeout );
@@ -343,11 +343,11 @@ namespace restbed
 
             size_t length = 0;
             auto finished = std::make_shared<bool>(false);
-            auto sharedError = std::make_shared<error_code>();
+            auto sharedError = std::make_shared<boost::system::error_code>();
             auto sharedLength = std::make_shared<size_t>(0);
 
-            asio::async_read_until( *m_socket, *data, delimiter,
-                [ finished, sharedLength, sharedError ]( const error_code & error, size_t length ) {
+            boost::asio::async_read_until( *m_socket, *data, delimiter,
+                [ finished, sharedLength, sharedError ]( const boost::system::error_code & error, size_t length ) {
                     *sharedError = error;
                     *sharedLength = length;
                     *finished = true;
@@ -367,13 +367,13 @@ namespace restbed
             return length;
         }
         
-        void IPCSocketImpl::read( const shared_ptr< asio::streambuf >& data, const string& delimiter, const function< void ( const error_code&, size_t ) >& callback )
+        void IPCSocketImpl::read( const shared_ptr< boost::asio::streambuf >& data, const string& delimiter, const function< void ( const boost::system::error_code&, size_t ) >& callback )
         {
             m_timer->cancel( );
             m_timer->expires_from_now( m_timeout );
             m_timer->async_wait( m_strand->wrap( bind( &IPCSocketImpl::connection_timeout_handler, this, shared_from_this( ), _1 ) ) );
             
-            asio::async_read_until( *m_socket, *data, delimiter, m_strand->wrap( [ this, callback ]( const error_code & error, size_t length )
+            boost::asio::async_read_until( *m_socket, *data, delimiter, m_strand->wrap( [ this, callback ]( const boost::system::error_code & error, size_t length )
             {
                 m_timer->cancel( );
                 
@@ -382,7 +382,7 @@ namespace restbed
                     m_is_open = false;
                 }
                 
-                if ( error not_eq asio::error::operation_aborted )
+                if ( error not_eq boost::asio::error::operation_aborted )
                 {
                     callback( error, length );
                 }

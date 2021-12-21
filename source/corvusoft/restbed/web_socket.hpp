@@ -14,9 +14,10 @@
 #include <corvusoft/restbed/web_socket_message.hpp>
 
 //External Includes
+#include <boost/system/error_code.hpp>
 
 //Windows DLL Exports
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(_WIN64)
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(_WIN64)) && !defined(RESTBED_BUILD_STATIC)
 	#ifdef WIN_DLL_EXPORT
 		#define WEB_SOCKET_EXPORT __declspec(dllexport)
 	#else
@@ -83,7 +84,7 @@ namespace restbed
             
             std::function< void ( const std::shared_ptr< WebSocket > ) > get_close_handler( void ) const;
             
-            std::function< void ( const std::shared_ptr< WebSocket >, const std::error_code ) > get_error_handler( void ) const;
+            std::function< void ( const std::shared_ptr< WebSocket >, const boost::system::error_code ) > get_error_handler( void ) const;
             
             std::function< void ( const std::shared_ptr< WebSocket >, const std::shared_ptr< WebSocketMessage > ) > get_message_handler( void ) const;
             
@@ -98,7 +99,7 @@ namespace restbed
             
             void set_close_handler( const std::function< void ( const std::shared_ptr< WebSocket > ) >& value );
             
-            void set_error_handler( const std::function< void ( const std::shared_ptr< WebSocket >, const std::error_code ) >& value );
+            void set_error_handler( const std::function< void ( const std::shared_ptr< WebSocket >, const boost::system::error_code ) >& value );
             
             void set_message_handler( const std::function< void ( const std::shared_ptr< WebSocket >, const std::shared_ptr< WebSocketMessage > ) >& value );
             

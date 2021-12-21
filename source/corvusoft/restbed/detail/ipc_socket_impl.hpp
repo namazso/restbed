@@ -22,11 +22,11 @@
 #include "corvusoft/restbed/detail/socket_impl.hpp"
 
 //External Includes
-#include <asio/streambuf.hpp>
-#include <asio/steady_timer.hpp>
-#include <asio/io_service.hpp>
-#include <asio/io_service_strand.hpp>
-#include <asio/local/stream_protocol.hpp>
+#include <boost/asio/streambuf.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/io_service_strand.hpp>
+#include <boost/asio/local/stream_protocol.hpp>
 
 //System Namespaces
 
@@ -52,7 +52,7 @@ namespace restbed
                 //Definitions
                 
                 //Constructors
-                IPCSocketImpl( asio::io_context& context, const std::shared_ptr< asio::local::stream_protocol::socket >& socket, const std::string& path, const std::shared_ptr< Logger >& logger = nullptr );
+                IPCSocketImpl( boost::asio::io_context& context, const std::shared_ptr< boost::asio::local::stream_protocol::socket >& socket, const std::string& path, const std::shared_ptr< Logger >& logger = nullptr );
 
                 ~IPCSocketImpl( void ) = default;
                 
@@ -63,21 +63,21 @@ namespace restbed
                 
                 bool is_closed( void ) const override;
                 
-                void connect(  const std::string& hostname, const uint16_t port, const std::function< void ( const std::error_code& ) >& callback ) override;
+                void connect(  const std::string& hostname, const uint16_t port, const std::function< void ( const boost::system::error_code& ) >& callback ) override;
                 
-                void sleep_for( const std::chrono::milliseconds& delay, const std::function< void ( const std::error_code& ) >& callback ) override;
+                void sleep_for( const std::chrono::milliseconds& delay, const std::function< void ( const boost::system::error_code& ) >& callback ) override;
                 
-				void start_write(const Bytes& data, const std::function< void ( const std::error_code&, std::size_t ) >& callback) override;
+				void start_write(const Bytes& data, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback) override;
 				
-				size_t start_read( const std::shared_ptr< asio::streambuf >& data, const std::string& delimiter, std::error_code& error ) override;
+				size_t start_read( const std::shared_ptr< boost::asio::streambuf >& data, const std::string& delimiter, boost::system::error_code& error ) override;
 				
-				size_t start_read( const std::shared_ptr< asio::streambuf >& data, const std::size_t length, std::error_code& error ) override;
+				size_t start_read( const std::shared_ptr< boost::asio::streambuf >& data, const std::size_t length, boost::system::error_code& error ) override;
                 
-				void start_read(const std::size_t length, const std::function< void ( const Bytes ) > success, const std::function< void ( const std::error_code ) > failure ) override;
+				void start_read(const std::size_t length, const std::function< void ( const Bytes ) > success, const std::function< void ( const boost::system::error_code ) > failure ) override;
                 
-				void start_read( const std::shared_ptr< asio::streambuf >& data, const std::size_t length, const std::function< void ( const std::error_code&, std::size_t ) >& callback ) override;
+				void start_read( const std::shared_ptr< boost::asio::streambuf >& data, const std::size_t length, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback ) override;
                 
-				void start_read(const std::shared_ptr< asio::streambuf >& data, const std::string& delimiter, const std::function< void ( const std::error_code&, std::size_t ) >& callback ) override;
+				void start_read(const std::shared_ptr< boost::asio::streambuf >& data, const std::string& delimiter, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback ) override;
 
                 //Getters
                 std::string get_local_endpoint( void ) override;
@@ -122,23 +122,23 @@ namespace restbed
                 //Functionality
                 std::shared_ptr< IPCSocketImpl > shared_from_this( void );
 
-                void connection_timeout_handler( const std::shared_ptr< IPCSocketImpl > socket, const std::error_code& error );
+                void connection_timeout_handler( const std::shared_ptr< IPCSocketImpl > socket, const boost::system::error_code& error );
 
                 void write( void );
                 
-                void write( const Bytes& data, const std::function< void ( const std::error_code&, std::size_t ) >& callback );
+                void write( const Bytes& data, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback );
                 
-				void write_helper( const Bytes& data, const std::function< void ( const std::error_code&, std::size_t ) >& callback );
+				void write_helper( const Bytes& data, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback );
 
-                size_t read( const std::shared_ptr< asio::streambuf >& data, const std::size_t length, std::error_code& error );
+                size_t read( const std::shared_ptr< boost::asio::streambuf >& data, const std::size_t length, boost::system::error_code& error );
                 
-                void read( const std::size_t length, const std::function< void ( const Bytes ) > success, const std::function< void ( const std::error_code ) > failure );
+                void read( const std::size_t length, const std::function< void ( const Bytes ) > success, const std::function< void ( const boost::system::error_code ) > failure );
                 
-                void read( const std::shared_ptr< asio::streambuf >& data, const std::size_t length, const std::function< void ( const std::error_code&, std::size_t ) >& callback );
+                void read( const std::shared_ptr< boost::asio::streambuf >& data, const std::size_t length, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback );
                 
-                size_t read( const std::shared_ptr< asio::streambuf >& data, const std::string& delimiter, std::error_code& error );
+                size_t read( const std::shared_ptr< boost::asio::streambuf >& data, const std::string& delimiter, boost::system::error_code& error );
                 
-                void read( const std::shared_ptr< asio::streambuf >& data, const std::string& delimiter, const std::function< void ( const std::error_code&, std::size_t ) >& callback );
+                void read( const std::shared_ptr< boost::asio::streambuf >& data, const std::string& delimiter, const std::function< void ( const boost::system::error_code&, std::size_t ) >& callback );
  
                 //Getters
                 
@@ -154,19 +154,19 @@ namespace restbed
 
 		        const uint8_t MAX_WRITE_RETRIES = 5;
                 
-	            std::queue< std::tuple< Bytes, uint8_t, std::function< void ( const std::error_code&, std::size_t ) > > > m_pending_writes;
+	            std::queue< std::tuple< Bytes, uint8_t, std::function< void ( const boost::system::error_code&, std::size_t ) > > > m_pending_writes;
 
                 std::shared_ptr< Logger > m_logger;
                 
                 std::chrono::milliseconds m_timeout;
 
-                asio::io_context &m_io_service;
+                boost::asio::io_context &m_io_service;
 
-                std::shared_ptr< asio::steady_timer > m_timer;
+                std::shared_ptr< boost::asio::steady_timer > m_timer;
                 
-                std::shared_ptr< asio::io_service::strand > m_strand;
+                std::shared_ptr< boost::asio::io_service::strand > m_strand;
                                 
-                std::shared_ptr< asio::local::stream_protocol::socket > m_socket;
+                std::shared_ptr< boost::asio::local::stream_protocol::socket > m_socket;
         };
     }
 }

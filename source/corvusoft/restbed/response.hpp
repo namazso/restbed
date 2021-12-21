@@ -19,7 +19,7 @@
 //External Includes
 
 //Windows DLL Exports
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(_WIN64)
+#if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(_WIN64)) && !defined(RESTBED_BUILD_STATIC)
 	#ifdef WIN_DLL_EXPORT
 		#define RESPONSE_EXPORT __declspec(dllexport)
 	#else

@@ -31,7 +31,7 @@ using std::mt19937;
 using std::function;
 using std::to_string;
 using std::shared_ptr;
-using std::error_code;
+using boost::system::error_code;
 using std::make_shared;
 using std::random_device;
 using std::placeholders::_1;

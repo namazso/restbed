@@ -8,8 +8,8 @@
 #include <restbed>
 
 //External Includes
-#include <asio.hpp>
-#include <catch.hpp>
+#include <boost/asio.hpp>
+#include <catch2/catch.hpp>
 
 //System Namespaces
 using std::thread;
@@ -21,10 +21,10 @@ using std::chrono::seconds;
 using namespace restbed;
 
 //External Namespaces
-using asio::ip::tcp;
-using asio::connect;
-using asio::io_service;
-using asio::system_error;
+using boost::asio::ip::tcp;
+using boost::asio::connect;
+using boost::asio::io_service;
+using boost::system::system_error;
 
 bool exception_was_thrown = false;
 
@@ -36,7 +36,7 @@ void worker( shared_ptr< Service > service, shared_ptr< Settings > settings )
     }
     catch ( const system_error& se )
     {
-        if ( se.code( ) == asio::error::eof )
+        if ( se.code( ) == boost::asio::error::eof )
         {
             exception_was_thrown = true;
         }

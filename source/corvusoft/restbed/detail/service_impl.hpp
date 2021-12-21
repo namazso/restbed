@@ -19,16 +19,16 @@
 //Project Includes
 
 //External Includes
-#include <asio/ip/tcp.hpp>
-#include <asio/signal_set.hpp>
-#include <asio/io_service.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/signal_set.hpp>
+#include <boost/asio/io_service.hpp>
 
 #ifdef BUILD_SSL
-    #include <asio/ssl.hpp>
+    #include <boost/asio/ssl.hpp>
 #endif
 
 #ifdef BUILD_IPC
-    #include <asio/local/stream_protocol.hpp>
+    #include <boost/asio/local/stream_protocol.hpp>
 #endif
 
 //System Namespaces
@@ -75,7 +75,7 @@ namespace restbed
                 
                 void https_listen( void ) const;
                 
-                void create_ssl_session( const std::shared_ptr< asio::ssl::stream< asio::ip::tcp::socket > >& socket, const std::error_code& error ) const;
+                void create_ssl_session( const std::shared_ptr< boost::asio::ssl::stream< boost::asio::ip::tcp::socket > >& socket, const boost::system::error_code& error ) const;
 #endif
 
 #ifdef BUILD_IPC
@@ -83,12 +83,12 @@ namespace restbed
 
                 void ipc_listen( void ) const;
 
-                void create_ipc_session( const std::shared_ptr< asio::local::stream_protocol::socket >& socket, const std::error_code& error ) const;
+                void create_ipc_session( const std::shared_ptr< boost::asio::local::stream_protocol::socket >& socket, const boost::system::error_code& error ) const;
 #endif
 
                 void setup_signal_handler( void );
                 
-                void signal_handler( const std::error_code& error, const int signal_number ) const;
+                void signal_handler( const boost::system::error_code& error, const int signal_number ) const;
                 
                 std::string sanitise_path( const std::string& path ) const;
                 
@@ -106,7 +106,7 @@ namespace restbed
                 
                 void router( const std::shared_ptr< Session > session ) const;
                 
-                void create_session( const std::shared_ptr< asio::ip::tcp::socket >& socket, const std::error_code& error ) const;
+                void create_session( const std::shared_ptr< boost::asio::ip::tcp::socket >& socket, const boost::system::error_code& error ) const;
                 
                 void extract_path_parameters( const std::string& sanitised_path, const std::shared_ptr< const Request >& request ) const;
                 
@@ -124,7 +124,7 @@ namespace restbed
                 
                 static const std::multimap< std::string, std::string > parse_request_headers( std::istream& stream );
                 
-                void parse_request( const std::error_code& error, std::size_t length, const std::shared_ptr< Session > session ) const;
+                void parse_request( const boost::system::error_code& error, std::size_t length, const std::shared_ptr< Session > session ) const;
                 
                 //Getters
                 const std::shared_ptr< const Uri > get_http_uri( void ) const;
@@ -146,9 +146,9 @@ namespace restbed
                 
                 std::shared_ptr< const Settings > m_settings;
                 
-                std::shared_ptr< asio::io_service > m_io_service;
+                std::shared_ptr< boost::asio::io_service > m_io_service;
                 
-                std::shared_ptr< asio::signal_set > m_signal_set;
+                std::shared_ptr< boost::asio::signal_set > m_signal_set;
                 
                 std::shared_ptr< SessionManager > m_session_manager;
                 
@@ -160,15 +160,15 @@ namespace restbed
 #ifdef BUILD_SSL
                 std::shared_ptr< const SSLSettings > m_ssl_settings;
                 
-                std::shared_ptr< asio::ssl::context > m_ssl_context;
+                std::shared_ptr< boost::asio::ssl::context > m_ssl_context;
                 
-                std::shared_ptr< asio::ip::tcp::acceptor > m_ssl_acceptor;
+                std::shared_ptr< boost::asio::ip::tcp::acceptor > m_ssl_acceptor;
 #endif
 
 #ifdef BUILD_IPC
-                std::shared_ptr< asio::local::stream_protocol::acceptor > m_ipc_acceptor;
+                std::shared_ptr< boost::asio::local::stream_protocol::acceptor > m_ipc_acceptor;
 #endif
-                std::shared_ptr< asio::ip::tcp::acceptor > m_acceptor;
+                std::shared_ptr< boost::asio::ip::tcp::acceptor > m_acceptor;
                 
                 std::map< std::string, std::string > m_resource_paths;
                 

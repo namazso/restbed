@@ -6,7 +6,7 @@
 #include <corvusoft/restbed/request.hpp>
 
 //External Includes
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 //System Namespaces
 using std::map;

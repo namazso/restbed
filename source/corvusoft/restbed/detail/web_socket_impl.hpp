@@ -76,7 +76,7 @@ namespace restbed
                 
                 std::function< void ( const std::shared_ptr< WebSocket > ) > m_close_handler = nullptr;
                 
-                std::function< void ( const std::shared_ptr< WebSocket >, const std::error_code ) > m_error_handler = nullptr;
+                std::function< void ( const std::shared_ptr< WebSocket >, const boost::system::error_code ) > m_error_handler = nullptr;
                 
                 std::function< void ( const std::shared_ptr< WebSocket >, const std::shared_ptr< WebSocketMessage > ) > m_message_handler = nullptr;
                 

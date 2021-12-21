@@ -13,13 +13,14 @@
 #include "corvusoft/restbed/detail/web_socket_manager_impl.hpp"
 
 //External Includes
+#include <boost/system/error_code.hpp>
 
 //System Namespaces
 using std::ref;
 using std::bind;
 using std::string;
 using std::function;
-using std::error_code;
+using boost::system::error_code;
 using std::shared_ptr;
 using std::make_shared;
 using std::placeholders::_1;
@@ -92,7 +93,7 @@ namespace restbed
     {
         const auto data = m_pimpl->m_manager->compose( message );
         
-        m_pimpl->m_socket->start_write( data, [ this, callback ]( const error_code & code, size_t )
+        m_pimpl->m_socket->start_write( data, [ this, callback ]( const boost::system::error_code & code, size_t )
         {
             if ( code )
             {
@@ -136,7 +137,7 @@ namespace restbed
         return m_pimpl->m_close_handler;
     }
     
-    function< void ( const shared_ptr< WebSocket >, const error_code ) > WebSocket::get_error_handler( void ) const
+    function< void ( const shared_ptr< WebSocket >, const boost::system::error_code ) > WebSocket::get_error_handler( void ) const
     {
         return m_pimpl->m_error_handler;
     }
@@ -180,14 +181,14 @@ namespace restbed
         };
     }
     
-    void WebSocket::set_error_handler( const function< void ( const shared_ptr< WebSocket >, const error_code ) >& value )
+    void WebSocket::set_error_handler( const function< void ( const shared_ptr< WebSocket >, const boost::system::error_code ) >& value )
     {
         if ( value == nullptr )
         {
             return;
         }
         
-        m_pimpl->m_error_handler = [ value, this ]( const shared_ptr< WebSocket > socket, const error_code code )
+        m_pimpl->m_error_handler = [ value, this ]( const shared_ptr< WebSocket > socket, const boost::system::error_code code )
         {
             if ( m_pimpl->m_error_handler_invoked == false )
             {

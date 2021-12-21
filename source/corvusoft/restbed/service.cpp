@@ -27,11 +27,11 @@
 #include "corvusoft/restbed/detail/web_socket_manager_impl.hpp"
 
 //External Includes
-#include <asio/io_service.hpp>
-#include <asio/steady_timer.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef BUILD_SSL
-    #include <asio/ssl.hpp>
+    #include <boost/asio/ssl.hpp>
 #endif
 
 //System Namespaces
@@ -49,7 +49,7 @@ using std::exception;
 using std::to_string;
 using std::unique_ptr;
 using std::shared_ptr;
-using std::error_code;
+using boost::system::error_code;
 using std::make_shared;
 using std::stable_sort;
 using std::runtime_error;
@@ -64,8 +64,8 @@ using restbed::detail::ServiceImpl;
 using restbed::detail::WebSocketManagerImpl;
 
 //External Namespaces
-using asio::io_service;
-using asio::steady_timer;
+using boost::asio::io_service;
+using boost::asio::steady_timer;
 
 namespace restbed
 {
@@ -339,7 +339,7 @@ namespace restbed
         
         auto timer = make_shared< steady_timer >( *m_pimpl->m_io_service );
         timer->expires_from_now( interval );
-        timer->async_wait( [ this, task, interval, timer ]( const error_code& )
+        timer->async_wait( [ this, task, interval, timer ]( const boost::system::error_code& )
         {
             task( );
             schedule( task, interval );

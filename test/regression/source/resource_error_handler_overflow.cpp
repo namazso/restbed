@@ -10,8 +10,8 @@
 #include <restbed>
 
 //External Includes
-#include <asio.hpp>
-#include <catch.hpp>
+#include <boost/asio.hpp>
+#include <catch2/catch.hpp>
 
 //System Namespaces
 using std::string;
@@ -25,10 +25,10 @@ using std::chrono::seconds;
 using namespace restbed;
 
 //External Namespaces
-using asio::ip::tcp;
-using asio::connect;
-using asio::io_service;
-using asio::system_error;
+using boost::asio::ip::tcp;
+using boost::asio::connect;
+using boost::asio::io_service;
+using boost::system::system_error;
 
 void error_handler( const int, const exception&, const std::shared_ptr< Session > session )
 {
@@ -80,7 +80,7 @@ TEST_CASE( "service error handler overflow", "[service]" )
             
             string request = "POST /test HTTP/1.1\r\nContent-Length: 1024\r\n\r\nABCDEFG";
             
-            socket.write_some( asio::buffer( request.data( ), request.size( ) ) );
+            socket.write_some( boost::asio::buffer( request.data( ), request.size( ) ) );
             socket.close( );
             
             std::this_thread::sleep_for( seconds( 1 ) );

@@ -13,14 +13,14 @@
 #include <restbed>
 
 //External Includes
-#include <asio.hpp>
-#include <catch.hpp>
+#include <boost/asio.hpp>
+#include <catch2/catch.hpp>
 
 //System Namespaces
 using std::thread;
 using std::string;
 using std::vector;
-using std::error_code;
+using boost::system::error_code;
 using std::shared_ptr;
 using std::make_shared;
 using std::chrono::seconds;
@@ -29,10 +29,10 @@ using std::chrono::seconds;
 using namespace restbed;
 
 //External Namespaces
-using asio::ip::tcp;
-using asio::connect;
-using asio::io_service;
-using asio::socket_base;
+using boost::asio::ip::tcp;
+using boost::asio::connect;
+using boost::asio::io_service;
+using boost::asio::socket_base;
 
 void get_handler( const shared_ptr< Session > session )
 {
@@ -62,10 +62,10 @@ SCENARIO( "validate connection timeout after connect", "[socket]" )
                 WHEN( "I establish a network connection and wait '4' seconds" )
                 {
                     io_service io_service;
-                    asio::ip::tcp::socket socket( io_service );
-                    asio::ip::tcp::endpoint endpoint( asio::ip::address::from_string( "127.0.0.1" ), 1984 );
+                    boost::asio::ip::tcp::socket socket( io_service );
+                    boost::asio::ip::tcp::endpoint endpoint( boost::asio::ip::address::from_string( "127.0.0.1" ), 1984 );
 
-                    error_code error;
+                    boost::system::error_code error;
                     socket.connect( endpoint, error );
                     
                     REQUIRE( true == socket.is_open( ) );
@@ -75,9 +75,9 @@ SCENARIO( "validate connection timeout after connect", "[socket]" )
                     THEN( "I should see the peer close the socket" )
                     {
                         uint8_t data;
-                        socket.receive( asio::buffer( &data, 1 ), socket_base::message_peek, error );
+                        socket.receive( boost::asio::buffer( &data, 1 ), socket_base::message_peek, error );
                         
-                        REQUIRE( ( error == asio::error::eof or error == asio::error::connection_reset ) );
+                        REQUIRE( ( error == boost::asio::error::eof or error == boost::asio::error::connection_reset ) );
                     }
                     
                     socket.close( );
@@ -115,16 +115,16 @@ SCENARIO( "validate connection timeout after partial request", "[socket]" )
                 AND_THEN( "I perform a partial HTTP request" )
                 {
                     io_service io_service;
-                    asio::ip::tcp::socket socket( io_service );
-                    asio::ip::tcp::endpoint endpoint( asio::ip::address::from_string( "127.0.0.1" ), 1984 );
+                    boost::asio::ip::tcp::socket socket( io_service );
+                    boost::asio::ip::tcp::endpoint endpoint( boost::asio::ip::address::from_string( "127.0.0.1" ), 1984 );
 
-                    error_code error;
+                    boost::system::error_code error;
                     socket.connect( endpoint, error );
                     
                     REQUIRE( true == socket.is_open( ) );
                     
                     string request = "GET /resource HTTP/1.1\r\n";
-                    socket.send( asio::buffer( request, request.length( ) ), 0, error );
+                    socket.send( boost::asio::buffer( request, request.length( ) ), 0, error );
                     
                     WHEN( "I wait '4' seconds" )
                     {
@@ -133,9 +133,9 @@ SCENARIO( "validate connection timeout after partial request", "[socket]" )
                         THEN( "I should see the peer close the socket" )
                         {
                             uint8_t data;
-                            socket.receive( asio::buffer( &data, 1 ), socket_base::message_peek, error );
+                            socket.receive( boost::asio::buffer( &data, 1 ), socket_base::message_peek, error );
                             
-                            REQUIRE( ( error == asio::error::eof or error == asio::error::connection_reset ) );
+                            REQUIRE( ( error == boost::asio::error::eof or error == boost::asio::error::connection_reset ) );
                         }
                         
                         socket.close( );
