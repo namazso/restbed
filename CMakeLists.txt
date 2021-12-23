@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 cmake_policy(SET CMP0074 NEW)
 cmake_policy(SET CMP0077 NEW)
@@ -25,7 +25,7 @@ find_package(Boost 1.77.0 REQUIRED)
 set(RESTBED_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/source")
 set(RESTBED_SOURCE_DIR "${PROJECT_SOURCE_DIR}/source/corvusoft/restbed")
 
-file(GLOB_RECURSE RESTBED_SOURCES "${RESTBED_SOURCE_DIR}/*.cpp")
+file(GLOB_RECURSE RESTBED_SOURCES CONFIGURE_DEPENDS "${RESTBED_SOURCE_DIR}/*.cpp")
 
 add_library(restbed ${RESTBED_SOURCES})
 
@@ -92,7 +92,7 @@ endif ()
 #
 # Install
 #
-file(GLOB ARTIFACTS "${RESTBED_SOURCE_DIR}/*.hpp")
+file(GLOB ARTIFACTS CONFIGURE_DEPENDS "${RESTBED_SOURCE_DIR}/*.hpp")
 
 install(FILES "${RESTBED_INCLUDE_DIR}/restbed" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
 install(FILES ${ARTIFACTS} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/corvusoft/restbed")
